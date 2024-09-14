@@ -57,7 +57,7 @@ static void broadcast(const std::string& topic, const std::string& msg)
 
 static void handleRequest(Socket& s, HttpRequest&& req, ServerWebService&)
 {
-	if (req.path == "/pub")
+	/*if (req.path == "/pub")
 	{
 		if (auto jr = json::decode(req.body))
 		{
@@ -65,13 +65,17 @@ static void handleRequest(Socket& s, HttpRequest&& req, ServerWebService&)
 			return ServerWebService::send204(s);
 		}
 		return ServerWebService::send400(s);
-	}
+	}*/
 	if (req.path.substr(0, 11) == "/pub?topic=")
 	{
-		broadcast(req.path.substr(11), req.body);
-		return ServerWebService::send204(s);
+		if (!req.body.empty())
+		{
+			broadcast(req.path.substr(11), req.body);
+			return ServerWebService::send204(s);
+		}
+		return ServerWebService::send400(s);
 	}
-	return ServerWebService::send404(s);
+	return ServerWebService::sendContent(s, "See https://pubsub.ing/ for usage information.");
 }
 
 int main()
