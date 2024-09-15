@@ -43,6 +43,12 @@ struct Subscriber
 
 static void broadcast(const std::string& topic, const std::string& msg)
 {
+	std::string outgoing;
+	outgoing.reserve(topic.size() + 1 + msg.size());
+	outgoing.append(topic);
+	outgoing.push_back(':');
+	outgoing.append(msg);
+
 	for (const auto& w : serv.workers)
 	{
 		if (w->type == WORKER_TYPE_SOCKET
@@ -50,7 +56,7 @@ static void broadcast(const std::string& topic, const std::string& msg)
 			&& reinterpret_cast<Socket*>(w.get())->custom_data.getStructFromMapConst(Subscriber).isSubscribedTo(topic)
 			)
 		{
-			ServerWebService::wsSendText(*reinterpret_cast<Socket*>(w.get()), msg);
+			ServerWebService::wsSendText(*reinterpret_cast<Socket*>(w.get()), outgoing);
 		}
 	}
 }
