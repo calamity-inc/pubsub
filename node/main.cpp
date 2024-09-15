@@ -81,7 +81,7 @@ static void handleRequest(Socket& s, HttpRequest&& req, ServerWebService&)
 		}
 		return ServerWebService::send400(s);
 	}
-	return ServerWebService::sendContent(s, "See https://pubsub.ing/ for usage information.");
+	return ServerWebService::sendContent(s, "See https://pubsub.cat/ for usage information.");
 }
 
 int main()

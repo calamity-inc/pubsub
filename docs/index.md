@@ -1,6 +1,6 @@
 ## Usage
 
-First, you'll need to obtain an endpoint from <https://pubsub.ing/endpoints.json>.
+First, you'll need to obtain an endpoint from <https://pubsub.cat/endpoints.json>.
 
 ### Subscriber
 
@@ -12,4 +12,4 @@ You can use the `-` prefix to remove a subscription.
 
 ### Publisher
 
-Send a HTTP request to the endpoint with path "/pub" and a "topic" query argument. For example, `curl notls.pubsub.ing/pub?topic=test --data "Hello"` to send "Hello" to every subscriber of `test`.
+Send a HTTP request to the endpoint with path "/pub" and a "topic" query argument. For example, `curl notls.pubsub.cat/pub?topic=test --data "Hello"` to send "Hello" to every subscriber of `test`.
