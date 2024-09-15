@@ -36,12 +36,6 @@ struct Subscriber
 
 static void broadcast(const std::string& topic, const std::string& msg)
 {
-	std::string outgoing;
-	outgoing.reserve(topic.size() + 1 + msg.size());
-	outgoing.append(topic);
-	outgoing.push_back(':');
-	outgoing.append(msg);
-
 	for (const auto& w : serv.workers)
 	{
 		if (w->type == WORKER_TYPE_SOCKET
@@ -49,27 +43,27 @@ static void broadcast(const std::string& topic, const std::string& msg)
 			&& reinterpret_cast<Socket*>(w.get())->custom_data.getStructFromMapConst(Subscriber).isSubscribedTo(topic)
 			)
 		{
-			ServerWebService::wsSendText(*reinterpret_cast<Socket*>(w.get()), outgoing);
+			ServerWebService::wsSendText(*reinterpret_cast<Socket*>(w.get()), msg);
 		}
 	}
 }
 
 static void handleRequest(Socket& s, HttpRequest&& req, ServerWebService&)
 {
-	/*if (req.path == "/pub")
-	{
-		if (auto jr = json::decode(req.body))
-		{
-			broadcast(jr->asObj().at("topic").asStr(), jr->asObj().at("msg").asStr());
-			return ServerWebService::send204(s);
-		}
-		return ServerWebService::send400(s);
-	}*/
 	if (req.path.substr(0, 11) == "/pub?topic=")
 	{
 		if (!req.body.empty())
 		{
-			broadcast(req.path.substr(11), req.body);
+			std::string topic = req.path.substr(11);
+			std::string& msg = req.body;
+
+			std::string outgoing;
+			outgoing.reserve(topic.size() + 1 + msg.size());
+			outgoing.append(topic);
+			outgoing.push_back(':');
+			outgoing.append(msg);
+
+			broadcast(topic, outgoing);
 			return ServerWebService::send204(s);
 		}
 		return ServerWebService::send400(s);
@@ -92,7 +86,7 @@ int main()
 	ServerWebService web_srv{ &handleRequest };
 	web_srv.should_accept_websocket_connection = [](Socket&, const HttpRequest& req, ServerWebService&)
 	{
-		return req.path == "/sub";
+		return true;
 	};
 	web_srv.on_websocket_message = [](WebSocketMessage& msg, Socket& s, ServerWebService&)
 	{
@@ -104,6 +98,14 @@ int main()
 
 		case '-':
 			s.custom_data.getStructFromMap(Subscriber).unsubscribe(msg.data.substr(1));
+			break;
+
+		case '^':
+			if (size_t topic_off = msg.data.find_first_of(':', 1); topic_off != std::string::npos)
+			{
+				std::string topic = msg.data.substr(1, topic_off - 1);
+				broadcast(topic, msg.data.substr(1));
+			}
 			break;
 		}
 	};
