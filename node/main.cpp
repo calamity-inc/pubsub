@@ -16,28 +16,21 @@ static Server serv;
 
 struct Subscriber
 {
-	std::vector<std::string> subscriptions;
+	std::unordered_set<std::string> subscriptions;
 
 	void subscribe(std::string&& topic)
 	{
-		subscriptions.emplace_back(std::move(topic));
+		subscriptions.emplace(std::move(topic));
 	}
 
 	void unsubscribe(const std::string& topic)
 	{
-		for (auto i = subscriptions.begin(); i != subscriptions.end(); ++i)
-		{
-			if (*i == topic)
-			{
-				subscriptions.erase(i);
-				break;
-			}
-		}
+		subscriptions.erase(topic);
 	}
 
 	[[nodiscard]] bool isSubscribedTo(const std::string& topic) const noexcept
 	{
-		return std::find(subscriptions.begin(), subscriptions.end(), topic) != subscriptions.end();
+		return subscriptions.count(topic);
 	}
 };
 
