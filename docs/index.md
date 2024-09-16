@@ -2,6 +2,9 @@
 
 First, you'll need to obtain an endpoint from <https://pubsub.cat/endpoints.json>.
 
+> [!NOTE]
+> The TLS endpoint is merely to allow for usage in "secure contexts" and does not provide real security as the private key we use is public.
+
 ### WebSocket
 
 - To subscribe to a topic, send a frame with `+` followed by the topic. For example, `+test` to subscribe to topic `test`.
